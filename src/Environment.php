@@ -44,7 +44,7 @@ class Environment
 	public function validate()
 	{
 		$sapi = php_sapi_name();
-		if (!in_array($sapi, ['cli', 'cgi'])) {
+		if ($sapi !== 'cli') {
 			throw new InvalidServerEnvironmentException($this->getText(sprintf('Server API %s is not supported.', $sapi), 'red'));
 		}
 	}
@@ -112,6 +112,17 @@ class Environment
 	}
 
 	/**
+	* @todo 	document.
+	*
+	* @access 	public
+	* @return 	<String>
+	*/
+	public function addSpace()
+	{
+		return '  ';
+	}
+
+	/**
 	* Sends output to the environment.
 	*
 	* @param 	$output <String>
@@ -123,6 +134,18 @@ class Environment
 	public function sendOutput(String $output, String $colour='white', String $backgroundColor='black')
 	{
 		fwrite(STDOUT, $this->getText($output, $colour, $backgroundColor));
+	}
+
+	/**
+	* Returns user input from the cli.
+	*
+	* @access 	public
+	* @return 	<String>
+	*/
+	public function getOutputOption()
+	{
+		$handle = fopen ("php://stdin","r");
+		return fgets($handle);
 	}
 
 }

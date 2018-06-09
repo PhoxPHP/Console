@@ -44,4 +44,8 @@ abstract class Attributes
 	const BG_BLUE = "\033[44m";
 	const BG_MAGENTA = "\033[45m";
 	const BG_CYAN = "\033[46m";
+
+	// TYPOGRAPHY
+	const TEXT_BOLD = "\e[1m";
+	const TEXT_UNDERLINE = "\e[4m";
 }

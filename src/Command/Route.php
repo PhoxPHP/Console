@@ -22,6 +22,7 @@
 
 namespace Kit\Console\Command;
 
+use Kit\Console\Command;
 use Kit\Console\Environment;
 use Kit\Console\Contract\Runnable;
 
@@ -35,11 +36,18 @@ class Route implements Runnable
 	protected	$env;
 
 	/**
+	* @var 		$cmd
+	* @access 	protected
+	*/
+	protected	$cmd;
+
+	/**
 	* {@inheritDoc}
 	*/
-	public function __construct(Environment $env)
+	public function __construct(Environment $env, Command $cmd)
 	{
 		$this->env = $env;
+		$this->cmd = $cmd;
 	}
 
 	/**

@@ -22,6 +22,7 @@
 
 namespace Kit\Console;
 
+use RuntimeException;
 use Kit\Console\Environment;
 use Kit\Console\Command\Help;
 use Kit\Console\Command\Route;
@@ -62,7 +63,7 @@ class Command
 	* @static
 	* @return 	<Boolean>
 	*/
-	public static function hasCommand(String $label) : Boolean
+	public static function hasCommand(String $label) : Bool
 	{
 		return (isset(Command::$commands[$label])) ? true : false;
 	}
@@ -113,8 +114,21 @@ class Command
 	*/
 	public function registerDefaults()
 	{
-		Command::registerCommand(new Route($this->env));
-		Command::registerCommand(new Help($this->env));
+		Command::registerCommand(new Route($this->env, $this));
+		Command::registerCommand(new Help($this->env, $this));
+	}
+
+	/**
+	* Returns a option from configuration key.
+	*
+	* @param 	$key <String>
+	* @access 	public
+	* @return 	<Mixed>
+	*/
+	public function getConfigOpt(String $key)
+	{
+		$config = include 'config.php';
+		return $config[$key] ?? null;
 	}
 
 	/**
@@ -130,13 +144,68 @@ class Command
 		$argumentsCount = $_SERVER['argc'] - 1;
 		$arguments = array_values($arguments);
 
-		if ($argumentsCount < 1 || $arguments[0] == 'help') {
-			// If no argument is passed, show help information. 
-			$help = Command::getCommandById('help');
-			return $help->run($arguments, $argumentsCount);
-		}
+		if ($argumentsCount > 0) {
+			$commandId = $arguments[0];
 
-		$this->env->sendOutput($argumentsCount);
+			if (!Command::hasCommand($commandId)) {
+				return $this->env->sendOutput(sprintf('[%s] is not a valid runnable id', $commandId), 'red');
+			}
+
+			$command = Command::getCommandById($commandId);
+			$runnableCmds = $command->runnableCommands();
+
+			if (isset($arguments[1])) {
+				if (!isset($runnableCmds[$arguments[1]])) {
+					return $this->env->sendOutput(sprintf('Command %s is an invalid command', $arguments[1]), 'red');
+				}
+
+				unset($arguments[0]);
+			}
+
+			$arguments = array_values($arguments);
+
+			if (count($arguments) > 1) {
+				// Check number of arguments passed to command and validate.
+				$commandArgumentLength = $runnableCmds[$arguments[0]];
+
+				// validate command with infinite arguments.
+				if ($commandArgumentLength == ':i' && (count($arguments) - 1) == 0) {
+					return $this->env->sendOutput(sprintf('[%s] command requires at least one argument', $arguments[0]), 'red');
+				}
+
+				// validate command with no arguments.
+				if ($commandArgumentLength == ':none' && (count($arguments) - 1) > 0) {
+					return $this->env->sendOutput(sprintf('[%s] command may not accept any argument', $arguments[0]), 'red');
+				}
+			}
+
+			return $command->run($arguments, $argumentsCount);
+		}
+	}
+
+	/**
+	* Sends output to user as a question and returns response.
+	*
+	* @param 	$question <String>
+	* @access 	public
+	* @return 	<String>
+	*/
+	public function question(String $question)
+	{
+		$this->env->sendOutput($question);
+		return $this->env->getOutputOption();
+	}
+
+	/**
+	* Sets error.
+	*
+	* @param 	$message <String>
+	* @access 	public
+	* @return 	<void>
+	*/
+	public function error(String $message)
+	{
+		trigger_error($message);
 	}
 
 }

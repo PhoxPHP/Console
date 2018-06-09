@@ -1,7 +1,7 @@
 <?php
 /**
 * @author 		Peter Taiwo <peter@phoxphp.com>
-* @package 		Kit\Console\Command
+* @package 		Kit\Console\ErrorHandler
 * @license 		MIT License
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,53 +20,57 @@
 * SOFTWARE.
 */
 
-namespace Kit\Console\Contract;
+namespace Kit\Console;
 
-use Kit\Console\Command;
 use Kit\Console\Environment;
 
-interface Runnable
+class ErrorHandler
 {
 
 	/**
-	* Runnable construct.
+	* @var 		$env
+	* @access 	protected
+	*/
+	protected	$env;
+
+	/**
+	* @var 		$cmd
+	* @access 	protected
+	*/
+	protected	$cmd;
+
+	/**
+	* ErrorHandler construct.
 	*
-	* @param 	$environment <Kit\Console\Environment>
-	* @param 	$environment <Kit\Console\Command>
+	* @param 	$env <Kit\Console\Environment>
+	* @param 	$cmd <Kit\Console\Command>
 	* @access 	public
 	* @return 	<void>
 	*/
-	public function __construct(Environment $environment, Command $command);
+	public function __construct(Environment $env, Command $cmd)
+	{
+		$this->env = $env;
+		$this->cmd = $cmd;
+	}
 
 	/**
-	* Returns the runnable's id.
+	* Handles generated errors.
 	*
-	* @access 	public
-	* @return 	<String>
-	*/
-	public function getId() : String;
-
-	/**
-	* Runs the called command.
-	*
-	* @param 	$argumentsList <Array>
-	* @param 	$argumentsCount <Integer>
+	* @param 	$errNumber <Integer>
+	* @param 	$errString <String>
+	* @param 	$errFile <String>
+	* @param 	$errLine <Integer>
 	* @access 	public
 	* @return 	<void>
 	*/
-	public function run(Array $argumentsList, int $argumentsCount);
+	public function handleError($errNumber, $errString, $errFile ='', $errLine = 0)
+	{
+		$interfaceSettings = $this->cmd->getConfigOpt('interface');
+		$textColor = $interfaceSettings['error']['text_color'];
+		$textBgColor = $interfaceSettings['error']['text_background'];
 
-	/**
-	* Returns an array of commands that a command object can run.
-	* The array keys will be the name of the command and the value will be the number of
-	* arguments.
-	*
-	* With a command that requires no arguments, you need set it's value to [:none].
-	* With a command that requires infinite arguments, you need to set it's value to [:i[]
-	*
-	* @access 	public
-	* @return 	<Array>
-	*/
-	public function runnableCommands() : Array;
+		$this->env->sendOutput('Error: ' . $errString, $textColor, $textBgColor);
+		exit;
+	}
 
 }

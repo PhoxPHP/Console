@@ -24,6 +24,7 @@ include '../vendor/autoload.php';
 
 use Kit\Console\Command;
 use Kit\Console\Environment;
+use Kit\Console\ErrorHandler;
 
 $env = new Environment();
 
@@ -34,6 +35,9 @@ $cmd = new Command($env);
 
 // Registeres default commands.
 $cmd->registerDefaults();
+
+$errorHandler = new ErrorHandler($env, $cmd);
+set_error_handler([$errorHandler, 'handleError'], E_ALL);
 
 // Watches output.
 $cmd->watchOutput();

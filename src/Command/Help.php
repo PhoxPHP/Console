@@ -22,12 +22,17 @@
 
 namespace Kit\Console\Command;
 
+use StdClass;
+use RuntimeException;
 use Kit\Console\Command;
 use Kit\Console\Environment;
 use Kit\Console\Contract\Runnable;
+use Kit\Console\Command\Uses\RunnableBuilder;
 
 class Help implements Runnable
 {
+
+	use RunnableBuilder;
 
 	/**
 	* @var 		$env
@@ -36,11 +41,18 @@ class Help implements Runnable
 	protected	$env;
 
 	/**
+	* @var 		$cmd
+	* @access 	protected
+	*/
+	protected 	$cmd;
+
+	/**
 	* {@inheritDoc}
 	*/
-	public function __construct(Environment $env)
+	public function __construct(Environment $env, Command $cmd)
 	{
 		$this->env = $env;
+		$this->cmd = $cmd;
 	}
 
 	/**
@@ -56,12 +68,25 @@ class Help implements Runnable
 	*/
 	public function run(Array $argumentsList, int $argumentsCount)
 	{
-		$mask = "|%5.5s |%-30.30s | x |\n";
-		$commands = array_values(Command::getRegisteredCommands());
+		$arguments = [];
 
-		$this->env->sendOutput('PhoxPHP Command Line Interface help.', 'green');
-		$this->env->sendOutput('Usage:'. $this->env->addTab() . 'php console [command id] [...arguments]');
-		$this->env->sendOutput($this->env->addTab() . 'E.g: ' . 'php console help list-commands');
+		if (!empty($argumentsList)) {
+			$arguments = $argumentsList;
+		}
+
+		if (!empty($arguments)) {
+			switch ($arguments[0]) {
+				case 'list-runnables':
+					return $this->listRunnables();
+					break;
+				case 'create-runnable':
+					return $this->createRunnable();
+					break;
+				case 'help':
+					return $this->displayHelpInformation();
+					break;
+			}
+		}
 	}
 
 	/**
@@ -70,19 +95,90 @@ class Help implements Runnable
 	public function runnableCommands() : Array
 	{
 		return [
-			'list-commands' => ':nil',
-			'create-runnable' => null
+			'list-runnables' => ':none',
+			'create-runnable' => ':none'
 		];
 	}
 
 	/**
-	* Lists all registered commands.
+	* Lists all registered runnables id.
 	*
 	* @access 	protected
 	* @return 	<void>
 	*/
-	protected function listCommands()
+	protected function listRunnables()
 	{
+		$commands = array_values(Command::getRegisteredCommands());
+		$format = "| %5.5s | %-30.30s\n";
+		
+		printf($format, "id", "class");
+		$this->env->sendOutput('-----------------------------------');
+		foreach($commands as $runnable) {
+			printf($format, $runnable->getId(), get_class($runnable));
+			$this->env->sendOutput('-----------------------------------');
+		}
+	}
 
+	/**
+	* Creates a new runnable class.
+	*
+	* @param 	$arguments <Array>
+	* @access 	protected
+	* @return 	<void>
+	*/
+	protected function createRunnable()
+	{
+		$runnable = new StdClass();
+		$response = $this->cmd->question('1. Runnable class name? [required]');
+		if (strlen($response) < 3) {
+			return $this->env->sendOutput('runnable class name is required.', 'red');
+		}
+		$runnable->name = rtrim($response);
+
+		$response = $this->cmd->question('2. Runnable class location? [optional]');
+		if (strlen($response) < 3) {
+			$response = null;
+		}
+
+		$response = trim($response);
+		if ($response !== '' && !is_dir($response)) {
+			return $this->cmd->error(sprintf('[%s] is not a directory', $response));
+		}
+		$runnable->location = $response;
+
+		$response = $this->cmd->question('3. Runnable command id? [required]');
+		if (strlen($response) < 3) {
+			return $this->cmd->error('runnable command id is required.');
+		}
+		$runnable->id = rtrim($response);
+
+		$response = $this->cmd->question('4. List of runnable commands? [optional] [e:g create-route:4(number of arguments)]');
+		$runnable->commandList = $response;
+
+		$response = $this->cmd->question('5. Do you want to create methods for each command [y/n]? [optional but defaults to no]');
+		$runnable->commandsHasMethods = $response;
+
+		$this->env->sendOutput('Creating runnable...' . $this->env->addNewLine(), 'green');
+		if($this->buildRunnable($runnable)) {
+			return $this->env->sendOutput('Runnable class has been created.', 'green');
+		}
+
+		return $this->cmd->error('Failed to create runnable class.');
+	}
+
+	/**
+	* Displays cli help information.
+	*
+	* @access 	protected
+	* @return 	<void>
+	*/
+	protected function displayHelpInformation()
+	{
+		$this->env->sendOutput('PhoxPHP Command Line Interface help.', 'green');
+		$this->env->sendOutput('Usage:'. $this->env->addTab() . 'php console [command id] [...arguments]');
+		$this->env->sendOutput($this->env->addTab() . 'E.g: ' . 'php console help list-commands' . $this->env->addNewLine());
+		$this->env->sendOutput($this->env->addTab() . 'list-runnables: ' . $this->env->addTab() . 'Lists all available runnables id');
+		$this->env->sendOutput($this->env->addTab() . 'create-runnable: ' . $this->env->addTab() . 'Creates a new runnable class');
+		$this->env->sendOutput($this->env->addTab() . 'list-runnable-commands: ' . 'Lists all commands available in a runnable object');
 	}
 }

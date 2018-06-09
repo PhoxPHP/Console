@@ -33,8 +33,16 @@ $env->validate();
 
 $cmd = new Command($env);
 
-// Registeres default commands.
+// Registeres default runnables.
 $cmd->registerDefaults();
+$runnables = $cmd->getConfigOpt('runnables');
+
+// Register runnables provided in configuration file.
+if (sizeof($runnables) > 0) {
+	foreach($runnables as $runnable) {
+		$cmd->registerCommand(new $runnable($env, $cmd));
+	}
+}
 
 $errorHandler = new ErrorHandler($env, $cmd);
 set_error_handler([$errorHandler, 'handleError'], E_ALL);

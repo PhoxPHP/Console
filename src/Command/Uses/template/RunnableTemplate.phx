@@ -1,5 +1,7 @@
 [phx:lang]
 
+[phx:namespace]
+
 use Kit\Console\Command;
 use Kit\Console\Environment;
 use Kit\Console\Contract\Runnable;

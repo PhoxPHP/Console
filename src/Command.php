@@ -156,7 +156,7 @@ class Command
 
 			if (isset($arguments[1])) {
 				if (!isset($runnableCmds[$arguments[1]])) {
-					return $this->env->sendOutput(sprintf('Command %s is an invalid command', $arguments[1]), 'red');
+					return $this->error(sprintf('Command %s is an invalid command', $arguments[1]), 'red');
 				}
 
 				unset($arguments[0]);
@@ -164,18 +164,22 @@ class Command
 
 			$arguments = array_values($arguments);
 
-			if (count($arguments) > 1) {
+			if (count($arguments) > 0) {
 				// Check number of arguments passed to command and validate.
 				$commandArgumentLength = $runnableCmds[$arguments[0]];
 
 				// validate command with infinite arguments.
 				if ($commandArgumentLength == ':i' && (count($arguments) - 1) == 0) {
-					return $this->env->sendOutput(sprintf('[%s] command requires at least one argument', $arguments[0]), 'red');
+					return $this->error(sprintf('[%s] command requires at least one argument', $arguments[0]), 'red');
 				}
 
 				// validate command with no arguments.
 				if ($commandArgumentLength == ':none' && (count($arguments) - 1) > 0) {
-					return $this->env->sendOutput(sprintf('[%s] command may not accept any argument', $arguments[0]), 'red');
+					return $this->error(sprintf('[%s] command may not accept any argument', $arguments[0]), 'red');
+				}
+
+				if (is_integer($commandArgumentLength) && (count($arguments) - 1) != $commandArgumentLength) {
+					$this->error(sprintf('[%s] command requires exactly [%d] argument(s)', $arguments[0], $commandArgumentLength));
 				}
 			}
 

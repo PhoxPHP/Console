@@ -82,6 +82,9 @@ class Help implements Runnable
 				case 'create-runnable':
 					return $this->createRunnable();
 					break;
+				case 'list-runnable-commands':
+					return $this->listRunnableCommands($arguments[1]);
+					break;
 				case 'help':
 					return $this->displayHelpInformation();
 					break;
@@ -96,7 +99,8 @@ class Help implements Runnable
 	{
 		return [
 			'list-runnables' => ':none',
-			'create-runnable' => ':none'
+			'create-runnable' => ':none',
+			'list-runnable-commands' => 1
 		];
 	}
 
@@ -109,7 +113,7 @@ class Help implements Runnable
 	protected function listRunnables()
 	{
 		$commands = array_values(Command::getRegisteredCommands());
-		$format = "| %5.5s | %-30.30s\n";
+		$format = "| %8.60s | %-50.30s\n";
 		
 		printf($format, "id", "class");
 		$this->env->sendOutput('-----------------------------------');
@@ -146,17 +150,17 @@ class Help implements Runnable
 		}
 		$runnable->location = $response;
 
-		$response = $this->cmd->question('3. Runnable command id? [required]');
+		$response = $this->cmd->question('3. Runnable class namespace? [optional]');
+		$runnable->namespace = rtrim($response);
+
+		$response = $this->cmd->question('4. Runnable command id? [required]');
 		if (strlen($response) < 3) {
 			return $this->cmd->error('runnable command id is required.');
 		}
 		$runnable->id = rtrim($response);
 
-		$response = $this->cmd->question('4. List of runnable commands? [optional] [e:g create-route:4(number of arguments)]');
-		$runnable->commandList = $response;
-
-		$response = $this->cmd->question('5. Do you want to create methods for each command [y/n]? [optional but defaults to no]');
-		$runnable->commandsHasMethods = $response;
+		$response = $this->cmd->question('5. List of runnable commands? [optional] [e:g create-route:4(number of arguments)]');
+		$runnable->runnableCommands = rtrim($response);
 
 		$this->env->sendOutput('Creating runnable...' . $this->env->addNewLine(), 'green');
 		if($this->buildRunnable($runnable)) {
@@ -164,6 +168,18 @@ class Help implements Runnable
 		}
 
 		return $this->cmd->error('Failed to create runnable class.');
+	}
+
+	/**
+	* Lists commands available in a runnable object.
+	*
+	* @param 	$runnableId <String>
+	* @access 	protected
+	* @return 	<String>
+	*/
+	protected function listRunnableCommands(String $runnableId)
+	{
+
 	}
 
 	/**

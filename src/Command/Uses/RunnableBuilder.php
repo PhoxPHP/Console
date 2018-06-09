@@ -39,7 +39,7 @@ trait RunnableBuilder
 	{
 		$template = __DIR__ . '/template' . '/RunnableTemplate.phx';
 		if (!file_exists($template)) {
-			$this->env->sendOutput(sprinf('Template file [%s] does not exist', $template), 'red');
+			$this->cmd->error(sprinf('Template file [%s] does not exist', $template), 'red');
 			exit;
 		}
 
@@ -48,20 +48,39 @@ trait RunnableBuilder
 		$hasName = $this->hasName($content);
 		$hasId = $this->hasId($content);
 		$hasRunnableCommands = $this->hasRunnableCommands($content);
+		$hasNamespace = $this->hasNamespace($content);
 
-		if (!$hasLang || !$hasName || !$hasId || !$hasRunnableCommands) {
-			$this->env->sendOutput('Cannot build runnable from invalid template.', 'red');
-			exit;
+		if (!$hasLang || !$hasName || !$hasId || !$hasRunnableCommands | !$hasNamespace) {
+			$this->cmd->error('Cannot build runnable from invalid template.');
 		}
 
 		$runnableCommands = '[]';
 		$location = $this->cmd->getConfigOpt('runnables_path');
+		$namespace = '';
+
+		if ($runnable->namespace !== '') {
+			$namespace = 'namespace ' . $runnable->namespace . ';';
+		}
+
+		if ($runnable->runnableCommands !== '') {
+			$runnableCommands = "[";
+				$commands = explode(',', $runnable->runnableCommands);
+				foreach($commands as $commandString) {
+					$cmdArray = explode(':', $commandString);
+					$command = ltrim(rtrim($cmdArray[0]));
+					$commandArgumentLength = $this->validateArgumentLengthType($cmdArray[1]);
+
+					$runnableCommands .= "\n" . $this->env->addTab() .  "\"" . $command . "\"" . ' => ' . $commandArgumentLength . ',';
+				}
+			$runnableCommands .= "\n]"; 
+		}
 
 		$replaces = [
 			'[phx:lang]' => '<?php',
 			'[phx:name]' => $runnable->name,
 			'[phx:id]' => $runnable->id,
 			'[phx:commands]' => $runnableCommands,
+			'[phx:namespace]' => $namespace
 		];
 
 		$runnableContent = str_replace(
@@ -142,6 +161,42 @@ trait RunnableBuilder
 		}
 
 		return false;
+	}
+
+	/**
+	* Checks if template has [phx:namespace] tag.
+	*
+	* @param 	$content <String>
+	* @access 	protected
+	* @return 	<Boolean>
+	*/
+	protected function hasNamespace(String $content) : Bool
+	{
+		if (preg_match("/\[phx\:namespace\]/", $content)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	* Checks and validates the argument type returned.
+	*
+	* @param 	$argument <String>
+	* @access 	protected
+	* @return 	<String>
+	*/
+	protected function validateArgumentLengthType(String $argument)
+	{
+		if (!is_numeric($argument) && !in_array($argument, ['none', 'i'])) {
+			$this->cmd->error(sprintf('Failed to create runnable. [%s] is not a valid argument length type.', $argument));
+		}
+
+		if (in_array($argument, ['none', 'i'])) {
+			return  "\":" . $argument . "\"";
+		}
+
+		return $argument;
 	}
 
 }

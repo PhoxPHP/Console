@@ -164,7 +164,7 @@ class Command
 
 			$arguments = array_values($arguments);
 
-			if (count($arguments) > 0) {
+			if (count($arguments) > 0 && isset($runnableCmds[$arguments[0]])) {
 				// Check number of arguments passed to command and validate.
 				$commandArgumentLength = $runnableCmds[$arguments[0]];
 

@@ -175,11 +175,23 @@ class Help implements Runnable
 	*
 	* @param 	$runnableId <String>
 	* @access 	protected
-	* @return 	<String>
+	* @return 	<void>
 	*/
 	protected function listRunnableCommands(String $runnableId)
 	{
+		if (!Command::hasCommand($runnableId)) {
+			$this->cmd->error(sprintf('[%s] is not a valid runnable id', $runnableId));
+		}
 
+		$runnable = Command::getCommandById($runnableId);
+		$commands = $runnable->runnableCommands();
+
+		$format = "| %8.60s | %-50.30s\n";
+		
+		foreach($commands as $command => $argument) {
+			printf($format, $command, $argument);
+			$this->env->sendOutput('-----------------------------------');
+		}
 	}
 
 	/**

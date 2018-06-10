@@ -1,7 +1,7 @@
 <?php
 /**
 * @author 		Peter Taiwo <peter@phoxphp.com>
-* @package 		Kit\Console\Command\Route
+* @package 		Kit\Console\Command\Example
 * @license 		MIT License
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,7 +26,7 @@ use Kit\Console\Command;
 use Kit\Console\Environment;
 use Kit\Console\Contract\Runnable;
 
-class Route implements Runnable
+class Example implements Runnable
 {
 
 	/**
@@ -55,7 +55,7 @@ class Route implements Runnable
 	*/
 	public function getId() : String
 	{
-		return 'route';
+		return 'example';
 	}
 
 	/**
@@ -71,6 +71,6 @@ class Route implements Runnable
 	*/
 	public function runnableCommands() : Array
 	{
-		//
+		return [];
 	}
 }

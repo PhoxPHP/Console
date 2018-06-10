@@ -25,7 +25,7 @@ namespace Kit\Console;
 use RuntimeException;
 use Kit\Console\Environment;
 use Kit\Console\Command\Help;
-use Kit\Console\Command\Route;
+use Kit\Console\Command\Example;
 use Kit\Console\Contract\Runnable;
 
 class Command
@@ -114,7 +114,7 @@ class Command
 	*/
 	public function registerDefaults()
 	{
-		Command::registerCommand(new Route($this->env, $this));
+		Command::registerCommand(new Example($this->env, $this));
 		Command::registerCommand(new Help($this->env, $this));
 	}
 

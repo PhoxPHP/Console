@@ -24,5 +24,20 @@ namespace Kit\Console;
 
 class Composer
 {
-	//
+
+	/**
+	* @access 	public
+	* @return 	<void>
+	* @static
+	*/
+	public static function postCreateProjectCmd()
+	{
+		if (file_exists('config.php')) {
+			unlink('config.php');
+		}
+
+		$sourceDir = __DIR__;
+		copy($sourceDir . '/config.framework', $sourceDir . '/config.php');
+	}
+
 }

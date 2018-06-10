@@ -1,0 +1,57 @@
+[phx:lang]
+
+[phx:namespace]
+
+use Kit\Console\Command;
+use Kit\Console\Environment;
+use Kit\Console\Contract\Runnable;
+
+class [phx:name] implements Runnable
+{
+	
+	/**
+	* @var 		$env
+	* @access 	protected
+	*/
+	protected	$env;
+
+	/**
+	* @var 		$cmd
+	* @access 	protected
+	*/
+	protected	$cmd;
+
+	/**
+	* {@inheritDoc}
+	*/
+	public function __construct(Environment $env, Command $cmd)
+	{
+		$this->env = $env;
+		$this->cmd = $cmd;
+	}
+
+	/**
+	* {@inheritDoc}
+	*/
+	public function getId() : String
+	{
+		return '[phx:id]';
+	}
+
+	/**
+	* {@inheritDoc}
+	*/
+	public function run(Array $argumentsList, int $argumentsCount)
+	{
+		//
+	}
+
+	/**
+	* {@inheritDoc}
+	*/
+	public function runnableCommands() : Array
+	{
+		return [phx:commands];
+	}
+
+}

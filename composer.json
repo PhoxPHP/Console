@@ -1,0 +1,19 @@
+{
+	"name": "phoxphp/console",
+	"description": "PhoxPHP console component",
+	"keywords": ["php", "php7", "console"],
+	"author": [
+		{
+			"name": "Peter Taiwo",
+			"email": "peter@phoxphp.com"
+		}
+	],
+	"require": {
+		"php": ">=7.0.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"Kit\\Console\\": "src"
+		}
+	}
+}

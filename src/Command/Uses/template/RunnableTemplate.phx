@@ -1,5 +1,4 @@
 [phx:lang]
-
 [phx:namespace]
 
 use Kit\Console\Command;

@@ -20,7 +20,7 @@
 * SOFTWARE.
 */
 
-include '../vendor/autoload.php';
+// include '../vendor/autoload.php';
 
 use Kit\Console\Command;
 use Kit\Console\Environment;

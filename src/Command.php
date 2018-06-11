@@ -114,7 +114,6 @@ class Command
 	*/
 	public function registerDefaults()
 	{
-		Command::registerCommand(new Example($this->env, $this));
 		Command::registerCommand(new Help($this->env, $this));
 	}
 

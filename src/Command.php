@@ -177,7 +177,7 @@ class Command
 					return $this->error(sprintf('[%s] command may not accept any argument', $arguments[0]), 'red');
 				}
 
-				if (is_integer($commandArgumentLength) && (count($arguments) - 1) != $commandArgumentLength) {
+				if (is_integer($commandArgumentLength) && (count($arguments) - 1) > $commandArgumentLength) {
 					$this->error(sprintf('[%s] command requires exactly [%d] argument(s)', $arguments[0], $commandArgumentLength));
 				}
 			}

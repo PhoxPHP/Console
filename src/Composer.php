@@ -26,6 +26,7 @@ class Composer
 {
 
 	/**
+	* @todo 	Document
 	* @access 	public
 	* @return 	<void>
 	* @static
